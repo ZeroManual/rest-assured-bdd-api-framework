@@ -1,0 +1,11 @@
+target/
+.idea/
+*.iml
+*.log
+.DS_Store
+allure-results/
+reports/
+screenshots/
+.env
+*.class
+.mvn/wrapper/maven-wrapper.jar

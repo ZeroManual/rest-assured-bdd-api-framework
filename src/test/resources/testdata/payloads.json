@@ -1,0 +1,12 @@
+{
+  "createPost": {
+    "userId": 101,
+    "title": "Senior automation API framework",
+    "body": "Created from REST Assured BDD automation framework"
+  },
+  "updatePost": {
+    "userId": 101,
+    "title": "Updated title from API automation",
+    "body": "Updated from PUT request using reusable payload factory"
+  }
+}

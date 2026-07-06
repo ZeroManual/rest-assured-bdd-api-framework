@@ -1,0 +1,24 @@
+pipeline {
+    agent any
+    tools { jdk 'JDK17'; maven 'Maven3' }
+    parameters {
+        string(name: 'BASE_URI_OVERRIDE', defaultValue: '', description: 'Optional SIT API URL')
+    }
+    stages {
+        stage('Run SIT API Tests') {
+            steps {
+                checkout scm
+                script {
+                    def baseUriArg = params.BASE_URI_OVERRIDE?.trim() ? "-Dbase.uri=${params.BASE_URI_OVERRIDE}" : ''
+                    sh "mvn clean test -Psit-suite -Denv=sit -DthreadCount=2 ${baseUriArg}"
+                }
+            }
+        }
+    }
+    post {
+        always {
+            junit allowEmptyResults: true, testResults: 'target/cucumber-reports/cucumber.xml,target/surefire-reports/*.xml'
+            archiveArtifacts artifacts: 'target/cucumber-reports/**', allowEmptyArchive: true
+        }
+    }
+}

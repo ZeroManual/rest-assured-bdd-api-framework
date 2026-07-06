@@ -1,0 +1,6 @@
+services:
+  api-tests:
+    build: .
+    command: mvn clean test -Psmoke-suite -Denv=qa
+    volumes:
+      - ./target:/workspace/target

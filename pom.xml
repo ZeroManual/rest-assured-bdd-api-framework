@@ -1,0 +1,213 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.company</groupId>
+    <artifactId>rest-assured-bdd-api-framework</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>REST Assured BDD API Automation Framework</name>
+    <description>Lead-level API automation framework using REST Assured, Cucumber BDD, TestNG, Maven and Jenkins CI.</description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.release>17</maven.compiler.release>
+
+        <!-- Update centrally when your company standard changes -->
+        <rest.assured.version>5.5.7</rest.assured.version>
+        <cucumber.version>7.34.3</cucumber.version>
+        <testng.version>7.12.0</testng.version>
+        <jackson.version>2.18.2</jackson.version>
+        <assertj.version>3.27.3</assertj.version>
+        <logback.version>1.5.18</logback.version>
+        <lombok.version>1.18.38</lombok.version>
+        <commons.io.version>2.19.0</commons.io.version>
+
+        <!-- Runtime controls passed from local/Jenkins -->
+        <env>qa</env>
+        <browser>chrome</browser>
+        <headless>true</headless>
+        <threadCount>1</threadCount>
+        <cucumber.filter.tags>not @wip</cucumber.filter.tags>
+        <failIfNoSpecifiedTests>false</failIfNoSpecifiedTests>
+    </properties>
+
+    <dependencies>
+        <!-- API testing core -->
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>${rest.assured.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>json-schema-validator</artifactId>
+            <version>${rest.assured.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- BDD + TestNG runner -->
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-java</artifactId>
+            <version>${cucumber.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-testng</artifactId>
+            <version>${cucumber.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-picocontainer</artifactId>
+            <version>${cucumber.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Assertions, serialization and utilities -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>${testng.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons.io.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.14.0</version>
+                <configuration>
+                    <release>${maven.compiler.release}</release>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.4</version>
+                <configuration>
+                    <includes>
+                        <include>**/RunCucumberTest.java</include>
+                    </includes>
+                    <testFailureIgnore>false</testFailureIgnore>
+                    <systemPropertyVariables>
+                        <env>${env}</env>
+                        <browser>${browser}</browser>
+                        <headless>${headless}</headless>
+                        <threadCount>${threadCount}</threadCount>
+                        <cucumber.filter.tags>${cucumber.filter.tags}</cucumber.filter.tags>
+                    </systemPropertyVariables>
+                    <properties>
+                        <property>
+                            <name>dataproviderthreadcount</name>
+                            <value>${threadCount}</value>
+                        </property>
+                    </properties>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>smoke-suite</id>
+            <properties>
+                <cucumber.filter.tags>@smoke and not @wip</cucumber.filter.tags>
+                <threadCount>1</threadCount>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>sit-suite</id>
+            <properties>
+                <cucumber.filter.tags>@sit and not @wip</cucumber.filter.tags>
+                <threadCount>2</threadCount>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>regression-suite</id>
+            <properties>
+                <cucumber.filter.tags>@regression and not @wip</cucumber.filter.tags>
+                <threadCount>4</threadCount>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>contract-suite</id>
+            <properties>
+                <cucumber.filter.tags>@contract and not @wip</cucumber.filter.tags>
+                <threadCount>2</threadCount>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>security-suite</id>
+            <properties>
+                <cucumber.filter.tags>@security and not @wip</cucumber.filter.tags>
+                <threadCount>1</threadCount>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>parallel-suite</id>
+            <properties>
+                <cucumber.filter.tags>not @wip</cucumber.filter.tags>
+                <threadCount>6</threadCount>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>full-suite</id>
+            <properties>
+                <cucumber.filter.tags>not @wip</cucumber.filter.tags>
+                <threadCount>4</threadCount>
+            </properties>
+        </profile>
+    </profiles>
+</project>

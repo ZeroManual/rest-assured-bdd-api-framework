@@ -1,0 +1,19 @@
+pipeline {
+    agent any
+    tools { jdk 'JDK17'; maven 'Maven3' }
+    triggers { cron('H 23 * * 1-5') } // Weekday nightly regression
+    stages {
+        stage('Run Regression API Tests') {
+            steps {
+                checkout scm
+                sh 'mvn clean test -Pregression-suite -Denv=qa -DthreadCount=6'
+            }
+        }
+    }
+    post {
+        always {
+            junit allowEmptyResults: true, testResults: 'target/cucumber-reports/cucumber.xml,target/surefire-reports/*.xml'
+            archiveArtifacts artifacts: 'target/cucumber-reports/**,target/surefire-reports/**', allowEmptyArchive: true
+        }
+    }
+}

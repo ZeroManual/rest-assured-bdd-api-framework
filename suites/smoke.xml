@@ -1,0 +1,9 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Smoke API Suite" verbose="1" parallel="tests" thread-count="1">
+    <parameter name="maven.profile" value="smoke-suite"/>
+    <test name="Smoke Cucumber API Tests">
+        <classes>
+            <class name="com.company.api.runners.RunCucumberTest"/>
+        </classes>
+    </test>
+</suite>

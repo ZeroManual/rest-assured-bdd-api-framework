@@ -1,0 +1,19 @@
+pipeline {
+    agent any
+    tools { jdk 'JDK17'; maven 'Maven3' }
+    triggers { pollSCM('H/15 * * * *') }
+    stages {
+        stage('Run Smoke API Tests') {
+            steps {
+                checkout scm
+                sh 'mvn clean test -Psmoke-suite -Denv=qa -DthreadCount=1'
+            }
+        }
+    }
+    post {
+        always {
+            junit allowEmptyResults: true, testResults: 'target/cucumber-reports/cucumber.xml,target/surefire-reports/*.xml'
+            archiveArtifacts artifacts: 'target/cucumber-reports/**', allowEmptyArchive: true
+        }
+    }
+}
